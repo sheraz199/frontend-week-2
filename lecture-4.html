@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Week 1: Web Architecture | Nexus Academy</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+    <style>
+        /* LMS DARK THEME */
+        :root {
+            --primary-bg: #0f172a; 
+            --card-bg: #1e293b; 
+            --accent-color: #0d6efd; 
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border-color: rgba(255, 255, 255, 0.08);
+        }
+
+        body {
+            background-color: var(--primary-bg); 
+            font-family: 'Inter', sans-serif;
+            padding: 20px;
+            color: var(--text-main);
+        }
+
+        .action-bar { 
+            max-width: 800px; 
+            margin: 0 auto 20px auto; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+        }
+        
+        .document-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: var(--card-bg);
+            padding: 50px 60px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+            position: relative;
+        }
+
+        /* --- TYPOGRAPHY --- */
+        .doc-header { border-bottom: 2px solid var(--border-color); padding-bottom: 20px; margin-bottom: 30px; }
+        
+        .course-name {
+            display: inline-block;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: #60a5fa; /* Lighter blue for dark bg */
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+        
+        .doc-header h1 { font-weight: 800; color: var(--text-main); margin-bottom: 8px; font-size: 2.2rem; line-height: 1.2; }
+        .module-name { color: var(--text-muted); margin: 0; font-weight: 500; font-size: 1.1rem; }
+        h2 { font-weight: 700; color: var(--text-main); margin-top: 35px; margin-bottom: 15px; font-size: 1.5rem; }
+        p, ul, ol { line-height: 1.8; font-size: 1.05rem; margin-bottom: 20px; color: #cbd5e1; }
+        
+        .highlight-box { 
+            background-color: rgba(13, 110, 253, 0.15); 
+            border-left: 4px solid var(--accent-color); 
+            padding: 20px; 
+            border-radius: 0 8px 8px 0; 
+            margin: 30px 0; 
+            color: var(--text-main);
+        }
+
+        /* --- LESSON IMAGES --- */
+        .lesson-image-container {
+            margin: 40px 0;
+            text-align: center; /* Centers the caption */
+        }
+        
+        .lesson-image-container img {
+            max-width: 100%;    /* Makes it responsive! It will never break outside the box */
+            height: auto;       /* Keeps the proportions correct */
+            display: block;
+            margin: 0 auto;     /* Centers the image perfectly */
+            border-radius: 8px; /* Matches your theme's soft corners */
+            border: 1px solid #e2e8f0; /* Subtle border for white images */
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); /* Soft shadow */
+        }
+
+        .lesson-image-container figcaption {
+            margin-top: 12px;
+            font-size: 0.9rem;
+            color: #64748b; /* Soft gray for the caption */
+            font-style: italic;
+        }
+
+        /* Dark Mode Override (If you are using the dark theme template) */
+        .pdf-export-mode .lesson-image-container img {
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        /* --- PAGINATION --- */
+        .lesson-page { display: none; animation: fadeIn 0.4s ease-in-out; }
+        .lesson-page.active-page { display: block; }
+        
+        .pagination-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .page-indicator { font-weight: 600; color: var(--text-muted); }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+       /* ========================================== */
+        /* SMART PRINT MODE (Light Theme + Page Breaks) */
+        /* ========================================== */
+        
+        .pdf-rendering .action-bar, 
+        .pdf-rendering .pagination-controls { display: none !important; }
+
+        .pdf-rendering {
+            background-color: #ffffff !important;
+            color: #1e293b !important;
+            border: none !important;
+            box-shadow: none !important;
+            
+            /* THE FIX: Resets width so the PDF engine doesn't chop the left side */
+            margin: 0 !important;
+            padding: 0 !important;
+            max-width: 100% !important;
+            width: 100% !important;
+        }
+        
+        .pdf-rendering h1, .pdf-rendering h2, .pdf-rendering .pdf-brand-header h2 { color: #0f172a !important; }
+        .pdf-rendering p, .pdf-rendering ul, .pdf-rendering ol, .pdf-rendering .module-name { color: #334155 !important; }
+        .pdf-rendering .course-name { color: #0d6efd !important; }
+        .pdf-rendering .doc-header { border-bottom-color: #e2e8f0 !important; }
+        .pdf-rendering .highlight-box { background-color: #f0f9ff !important; color: #1e293b !important; }
+
+        .pdf-rendering .lesson-page {
+            opacity: 1 !important;
+            margin-bottom: 30px;
+        }
+        .pdf-rendering .lesson-page:last-of-type { page-break-after: auto; }
+
+        .pdf-rendering h2, .pdf-rendering p, .pdf-rendering li, 
+        .pdf-rendering .highlight-box, .pdf-rendering .lesson-image-container {
+            page-break-inside: avoid;
+        } 
+
+        @media (max-width: 768px){
+            /* --- HERO BOX FIXES (Start & End Pages) --- */
+            .hero-box {
+                padding: 2rem 1.5rem !important; 
+            }
+            .hero-box h1 {
+                font-size: 2rem !important; 
+            }
+            .hero-box h3 {
+                font-size: 1.25rem !important; 
+            }
+            .hero-box p.lead {
+                font-size: 0.95rem !important; 
+                margin-bottom: 1.5rem !important; 
+            }
+            .hero-box .btn {
+                padding: 12px 20px !important; 
+                font-size: 1.1rem !important; 
+            }
+            .hero-box svg {
+                width: 56px !important; 
+                height: 56px !important;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="action-bar" id="actionBar">
+        <span class="badge text-bg-primary px-3 py-2 rounded-pill shadow-sm">Nexus Academy Official Material</span>
+        <button class="btn btn-outline-light fw-bold shadow-sm" id="pdfBtn" onclick="downloadPDF()">
+            <i class="bi bi-file-earmark-pdf-fill me-2 text-danger"></i>Download Full PDF
+        </button>
+    </div>
+
+    <div class="document-container" id="printableArea">
+        
+        <div class="doc-header">
+            <span class="course-name">Frontend Development</span>
+            <h1 id="lessonTitle">Week 2: JavaScript Foundations</h1>
+            <p class="module-name">Lesson 4 • JS Basics: Variables, data types, and flow control.</p>
+        </div>
+
+        <!-----WELCOME PAGE----->
+
+       <div class="lesson-page active-page" id="page-1">
+            <div class="container-fluid py-5 d-flex flex-column justify-content-center align-items-center text-light">
+            
+            <div class="hero-box text-center p-5 rounded shadow-lg border" style="max-width: 650px; background-color: var(--primary-bg); border-color: var(--border-color) !important;">
+                
+            <span class="badge bg-primary mb-3 px-3 py-2 text-uppercase letter-spacing-1">Nexus Academy</span>
+            
+            <h1 class="display-5 fw-bold text-white mb-3">Welcome to Lecture 4</h1>
+            <h3 class="fw-light text-info mb-4 fs-4">JS Basics: Variables, Data Types, and Flow Control</h3>
+            
+            <p class="lead mb-5 text-light opacity-75 fs-6">
+            In this lesson, you will learn the fundamental logic that gives a website its brain. Get ready to write your first lines of JavaScript!
+            </p>
+    
+            <button onclick="changePage(1)" class="btn btn-primary btn-lg w-100 px-5 py-3 fw-bold rounded-pill shadow-sm transition-all">
+            Start Lesson <i class="bi bi-play-circle-fill ms-2"></i>
+            </button>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="lesson-page" id="page-2">
+            <p><b>Goal:</b> Master the "grammar" of JavaScript—the logic that gives your website its 
+                brain.</p>
+            <h2>1. Introduction: The Engine of the Web</h2>
+            <p>If HTML is the metal chassis of a car and CSS is the paint and seats,
+                then JavaScript is the engine and the dashboard. <br>
+                Without JavaScript, a website is just a static piece of paper—it looks nice,
+                but it can't do anything. JavaScript (JS) allows the page to "think," respond to 
+                clicks, calculate data,
+                and change its content without needing to reload the entire page.     
+            </p>
+
+            <h4>The Three Core Jobs of JavaScript:</h4>
+            <p>
+                JavaScript performs three main tasks to make the web feel "alive":
+                <ol>
+                    <li>
+                        <strong>Listen (Events):</strong> JavaScript waits for the user to do something.
+                        <ul>
+                            <li><strong>Examples:</strong> Clicking a button, typing into a search box, hovering over an image, or scrolling to the bottom of the page.</li>
+                        </ul>
+                    </li>
+
+                    <li>
+                        <strong>Think (Logic):</strong> JavaScript processes information and makes decisions based on user interactions.
+                        <ul>
+                            <li><strong>Examples:</strong> Validating form inputs, calculating totals, or showing/hiding elements based on user actions.</li>
+                        </ul>
+                    </li>
+
+                    <li>
+                        <strong>Act (DOM Manipulation):</strong> JavaScript changes the content or appearance of the webpage based on user interactions.
+                        <ul>
+                            <li><strong>Examples:</strong> Updating text content, changing CSS styles, or showing/hiding elements based on user actions.</li>
+                        </ul>
+                    </li>
+                </ol>
+            </p>
+            
+        </div>
+
+        <div class="lesson-page" id="page-3">
+            <h2>2. Variables: The Storage Boxes</h2>
+            <p>To make a website interactive, we need to save information to use later. We do this using
+                 variables. Think of a variable as a labeled storage box in a warehouse. You put a piece 
+                 of data inside, slap a label on the box, and use that label whenever you need to find 
+                 that data again.
+            </p>
+
+            <p>
+                In modern JavaScript, we use two main keywords to create these boxes:
+                <ul>
+                    <li><strong>const (Constant):</strong> Use this for data that never changes.
+                    <ul>
+                        <li><strong>Examples:</strong> The value of pi (3.14), the URL of your website, or the name of your company. These are things that should never change once set.</li>
+                    </ul>
+                    </li>
+                    <li><strong>let (Variable):</strong> Use this for data that can change.
+                    <ul>
+                        <li><strong>Examples:</strong> A user's name, the number of items in a shopping cart, or the current temperature.</li>
+                    </ul>
+                    </li>
+                </ul>
+            </p>
+             
+            <figure class="lesson-image-container">
+                <img src="let-const.png" alt="Diagram" class="pdf-rendering" loading="lazy">
+                <figcaption>Figure 2.1: Declaration of variables.</figcaption>
+            </figure>
+            
+        </div>
+
+        <div class="lesson-page" id="page-4">
+            <h2>3. Data Types: What’s in the Box?</h2>
+            <p>JavaScript needs to know what kind of information you are putting in the "box" so it knows
+                 how to handle it. Here are the three most important types:</p>
+            <ol>
+                <li><strong>Strings (The "Sticky Notes")</strong>A String is simply text. JavaScript 
+                    doesn't try to understand it or do math with it; it just reads it exactly as written.
+                    You always wrap strings in quotation marks.
+                    <ul>
+                        <li><strong>Examples:</strong> "Hello, World!", "John Doe", or "2024-06-01". Even if it looks like a number, if it's in quotes, it's a string and treated as text.</li>
+                    </ul>
+                </li>
+                <li><strong>Numbers (The "Calculator Input")</strong>Numbers are exactly what they sound
+                     like. You use them when you need the computer to calculate, count, or measure 
+                     something. You never use quotation marks for numbers.
+                    <ul>
+                        <li><strong>Examples:</strong> 42, 3.14, or -10</li>
+                    </ul>
+                    </li>
+                <li><strong>Boolean (The "Light Switch")</strong>A Boolean is the simplest data type. It 
+                    only has two possible settings: true or false. These are the foundation of all website 
+                    logic.
+                <ul>
+                    <li><strong>Examples:</strong>Imagine a website's "Dark Mode." Behind the scenes, 
+                        there is a variable acting as a switch: let isDarkModeOn = false;. When the user
+                         clicks the button, JavaScript flips it to true.</li>
+                </ul>
+                </li>
+            </ol>
+        </div>
+
+        <div class="lesson-page" id="page-5">
+            <h2>4. Flow Control: Making Decisions</h2>
+            <p>Websites need to be "smart." They need to make decisions based on user actions. This is
+                 called Flow Control.
+                <ul>
+                    <li><strong>if/else statements:</strong> 
+                        These allow the program to choose different paths based on certain conditions.
+                        
+                        <figure class="lesson-image-container">
+                            <img src="if-else.png" alt="Diagram" class="pdf-rendering" loading="lazy">
+                            <figcaption>Figure 2.2: if/else statements.</figcaption>
+                        </figure>
+                    
+                    </li>
+                    <li><strong>Loops (for)</strong> What if you have to greet 100 people? You wouldn't
+                         write the code 100 times. You use a loop to tell the computer to repeat an 
+                         action until a condition is met.
+                        
+                            <figure class="lesson-image-container">
+                                <img src="for-loop.png" alt="Diagram" class="pdf-rendering" loading="lazy">
+                            <figcaption>Figure 2.3: for loops.</figcaption>
+
+                        </li>
+                </ul>
+            </p>
+                
+        </div>
+
+        <div class="lesson-page" id="page-6">
+            <div class="container-fluid py-5 d-flex flex-column justify-content-center align-items-center text-light">
+  
+            <div class="hero-box text-center p-5 rounded shadow-lg border" style="max-width: 600px; background-color: var(--primary-bg); border-color: var(--border-color) !important;">
+    
+            <div class="mb-4">
+                 <svg xmlns="http://www.w3.org/2000/svg" width="72" height="72" fill="currentColor" class="bi bi-check-circle-fill text-success" viewBox="0 0 16 16">
+                        <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"/>
+                </svg>
+            </div>
+    
+            <h1 class="display-6 fw-bold text-white mb-3">Lecture Completed!</h1>
+    
+            <p class="lead mb-4 text-light opacity-75 fs-6">
+                Great job! You have successfully mastered variables, data types, and flow control. You are one 
+                step closer to becoming a professional frontend engineer.
+            </p>
+    
+            <hr class="border-light opacity-25 mb-4">
+    
+                <a href="lecture-5.html" class="btn btn-success btn-lg w-100 px-5 py-3 fw-bold rounded-pill shadow-sm transition-all">
+                 Next Lesson <i class="bi bi-arrow-right-circle-fill ms-2"></i>
+                </a>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="pagination-controls" id="paginationControls">
+            <button class="btn btn-outline-primary text-white fw-bold px-4 rounded-pill border-primary" id="btnBack" onclick="changePage(-1)">
+                <i class="bi bi-arrow-left me-2"></i>Back
+            </button>
+            
+            <span class="page-indicator">Page <span id="currentPageNum">1</span> of <span id="totalPagesNum">3</span></span>
+            
+            <button class="btn btn-primary fw-bold px-4 rounded-pill" id="btnNext" onclick="changePage(1)">
+                Next<i class="bi bi-arrow-right ms-2"></i>
+            </button>
+        </div>
+
+    </div>
+
+    <script>
+        let currentPage = 1;
+        const totalPages = document.querySelectorAll('.lesson-page').length; 
+        
+        document.getElementById('totalPagesNum').innerText = totalPages;
+        updateButtons();
+
+        function changePage(direction) {
+            document.getElementById('page-' + currentPage).classList.remove('active-page');
+            currentPage += direction;
+            document.getElementById('page-' + currentPage).classList.add('active-page');
+            document.getElementById('currentPageNum').innerText = currentPage;
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            updateButtons();
+        }
+
+        function updateButtons() {
+            const controls = document.getElementById('paginationControls');
+            
+            // Hide bottom buttons on the first and last pages
+            if (currentPage === 1 || currentPage === totalPages) {
+                controls.style.display = 'none';
+            } else {
+                controls.style.display = 'flex';
+            }
+
+            document.getElementById('btnBack').disabled = (currentPage === 1);
+            document.getElementById('btnNext').disabled = (currentPage === totalPages);
+        }
+
+  function downloadPDF() {
+            const element = document.getElementById('printableArea');
+            const button = document.getElementById('pdfBtn');
+            const controls = document.getElementById('paginationControls');
+            const originalText = button.innerHTML;
+
+            button.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Generating...';
+            button.disabled = true;
+
+            element.classList.add('pdf-rendering');
+            
+            const allPages = document.querySelectorAll('.lesson-page');
+            
+            // --- DYNAMIC PAGE EXCLUSION LOGIC ---
+            allPages.forEach((p, index) => {
+                // Exclude the first page (0) and the last page (length - 1)
+                if (index === 0 || index === allPages.length - 1) {
+                    p.style.display = 'none'; // Hide from PDF
+                } else {
+                    p.style.display = 'block'; // Show in PDF
+                    
+                    // Remove page-break from the final printed page to prevent a blank empty page
+                    if (index === allPages.length - 2) {
+                        p.style.pageBreakAfter = 'auto';
+                    } else {
+                        p.style.pageBreakAfter = 'always';
+                    }
+                }
+            });
+
+            if(controls) controls.style.display = 'none';
+
+            const title = document.getElementById('lessonTitle') ? document.getElementById('lessonTitle').innerText : 'Lesson';
+            const fileName = title.replace(/[^a-z0-9]/gi, '_').toLowerCase() + '.pdf';
+
+            const opt = {
+                margin:       [0.5, 0.8, 0.5, 0.8], 
+                filename:     fileName,
+                image:        { type: 'jpeg', quality: 1 },
+                pagebreak:    { mode: ['css', 'legacy'], avoid: ['h2', 'p', 'li', '.highlight-box', 'img'] },
+                html2canvas:  { scale: 2, useCORS: true, scrollX: 0, scrollY: 0, backgroundColor: '#ffffff' },
+                jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
+            };
+
+            html2pdf().set(opt).from(element).save().then(() => {
+                element.classList.remove('pdf-rendering');
+                
+                // Clean up inline styles after PDF is generated
+                allPages.forEach(p => {
+                    p.style.display = '';
+                    p.style.pageBreakAfter = '';
+                }); 
+                
+                // Keep the user on their current page
+                document.getElementById('page-' + currentPage).classList.add('active-page'); 
+                
+                if(controls) updateButtons(); 
+                
+                button.innerHTML = originalText;
+                button.disabled = false;
+            });
+        }
+    </script>
+</body>
+</html>
